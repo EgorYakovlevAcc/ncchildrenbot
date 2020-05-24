@@ -91,7 +91,7 @@ public class MainController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("reaction/image/upload/{reaction}")
+    @PostMapping("reaction/image/upload/{reaction}")
     public ResponseEntity uploadImageForReaction(@RequestParam("image") MultipartFile imageFile, @PathVariable("reaction") String reaction){
         byte[] imageByte = new byte[0];
         try {
