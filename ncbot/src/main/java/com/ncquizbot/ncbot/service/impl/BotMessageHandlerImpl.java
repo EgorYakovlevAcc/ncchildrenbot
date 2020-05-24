@@ -10,31 +10,31 @@ import com.ncquizbot.ncbot.service.BotMessageHandler;
 import com.ncquizbot.ncbot.service.QuestionService;
 import com.ncquizbot.ncbot.service.ScoreRangesMessengerService;
 import com.ncquizbot.ncbot.service.UserService;
+import com.ncquizbot.ncbot.service.impl.dob.TextAndImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.telegram.telegrambots.api.methods.BotApiMethod;
-import org.telegram.telegrambots.api.methods.ParseMode;
-import org.telegram.telegrambots.api.methods.PartialBotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -165,32 +165,28 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
         if (user.isActiveNow()) {
             userService.updateLastUserSessionDate(user);
             if (user.getQuestionNumber() > 0) {
-                String outputTextMessage = updateUserScore(user, currentMessageText);
-                if (Objects.nonNull(outputTextMessage)) {
+                TextAndImage outputMessage = updateUserScore(user, currentMessageText);
+                if (Objects.nonNull(outputMessage)) {
                     inlineKeyboardMarkup = new InlineKeyboardMarkup();
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-                    if (user.getQuestionNumber() < 10) {
-                        inlineKeyboardButton.setText("next");
-                        inlineKeyboardButton.setCallbackData("next");
+                    if (user.getQuestionNumber() < questionService.findAll().size()) {
+                        inlineKeyboardButton.setText(COMMAND_NEXT);
+                        inlineKeyboardButton.setCallbackData(COMMAND_NEXT);
                         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
                         keyboardButtons.add(inlineKeyboardButton);
                         List<List<InlineKeyboardButton>> keyboardRowsList = new ArrayList<>();
                         keyboardRowsList.add(keyboardButtons);
                         inlineKeyboardMarkup.setKeyboard(keyboardRowsList);
                     } else {
-                        inlineKeyboardButton.setText("finish");
-                        inlineKeyboardButton.setCallbackData("finish");
+                        inlineKeyboardButton.setText(COMMAND_FINISH);
+                        inlineKeyboardButton.setCallbackData(COMMAND_FINISH);
                         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
                         keyboardButtons.add(inlineKeyboardButton);
                         List<List<InlineKeyboardButton>> keyboardRowsList = new ArrayList<>();
                         keyboardRowsList.add(keyboardButtons);
                         inlineKeyboardMarkup.setKeyboard(keyboardRowsList);
                     }
-                    SendMessage sendMessage = new SendMessage();
-                    sendMessage.setChatId(user.getChatId())
-                            .setText(outputTextMessage);
-                    messagesPackage.addMessageToPackage(sendMessage);
-                    sendMessage.setReplyMarkup(inlineKeyboardMarkup);
+                    messagesPackage = getSendMessageForBot(outputMessage.getText(), user.getChatId(), inlineKeyboardMarkup, outputMessage.getImage());
                 }
             }
             return messagesPackage;
@@ -214,7 +210,7 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
 
     }
 
-    private String updateUserScore(User user, String userAnswerText) {
+    private TextAndImage updateUserScore(User user, String userAnswerText) {
         LOGGER.info("updateUserScore [START]");
         String message = "";
         Question lastQuestion = questionService.findQuestionById(user.getCurrentQuestionId());
@@ -226,14 +222,35 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
                 .map(x -> x.getContent())
                 .collect(Collectors.toList())
                 .indexOf(answer.getContent());
+        TextAndImage textAndImage = new TextAndImage();
         if (checkAnswer(Integer.parseInt(userAnswerText), answerIndex)) {
             userService.increaseUserScore(user, questionWeight);
             message = "[ВЕРНО]\n";
-        }
-        else {
+            try {
+                textAndImage.setImage(getImageAsByteArray("ok.jpg"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
             message = "[НЕВЕРНО]\n";
+            try {
+                textAndImage.setImage(getImageAsByteArray("sad.jpg"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return message + lastQuestion.getOptions().get(Integer.parseInt(userAnswerText)).getReaction();
+        textAndImage.setText(message + lastQuestion.getOptions().get(Integer.parseInt(userAnswerText)).getReaction());
+        return textAndImage;
+    }
+
+    private byte[] getImageAsByteArray(String imageName) throws IOException {
+        File imgPath = new File(imageName);
+        BufferedImage bufferedImage = ImageIO.read(imgPath);
+
+        // get DataBufferBytes from Raster
+        WritableRaster raster = bufferedImage.getRaster();
+        DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
+        return data.getData();
     }
 
     private MessagesPackage getSendMessageForBot(String content, Long chatId, InlineKeyboardMarkup replyKeyboardMarkup, byte[] attachment) {
