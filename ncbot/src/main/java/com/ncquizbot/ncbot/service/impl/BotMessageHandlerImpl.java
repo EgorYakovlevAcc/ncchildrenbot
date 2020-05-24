@@ -118,7 +118,7 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
         List<InlineKeyboardButton> keyboardRow = new ArrayList<>();
         List<List<InlineKeyboardButton>> keyboardRowList = new ArrayList<>();
         InlineKeyboardButton keyboardButton = new InlineKeyboardButton();
-        keyboardButton.setText(COMMAND_GO);
+        keyboardButton.setText("начать");
         keyboardButton.setCallbackData(COMMAND_GO);
         keyboardRow.add(keyboardButton);
         keyboardRowList.add(keyboardRow);
@@ -169,7 +169,7 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
                     inlineKeyboardMarkup = new InlineKeyboardMarkup();
                     InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
                     if (user.getQuestionNumber() < questionService.findAll().size()) {
-                        inlineKeyboardButton.setText(COMMAND_NEXT);
+                        inlineKeyboardButton.setText("следующий");
                         inlineKeyboardButton.setCallbackData(COMMAND_NEXT);
                         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
                         keyboardButtons.add(inlineKeyboardButton);
@@ -177,7 +177,7 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
                         keyboardRowsList.add(keyboardButtons);
                         inlineKeyboardMarkup.setKeyboard(keyboardRowsList);
                     } else {
-                        inlineKeyboardButton.setText(COMMAND_FINISH);
+                        inlineKeyboardButton.setText("конец");
                         inlineKeyboardButton.setCallbackData(COMMAND_FINISH);
                         List<InlineKeyboardButton> keyboardButtons = new ArrayList<>();
                         keyboardButtons.add(inlineKeyboardButton);
