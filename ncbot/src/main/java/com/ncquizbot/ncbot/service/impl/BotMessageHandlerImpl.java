@@ -6,10 +6,7 @@ import com.ncquizbot.ncbot.model.*;
 import com.ncquizbot.ncbot.pojo.HelloGoodbyeMessages;
 import com.ncquizbot.ncbot.qrcode.QrCodeGenerator;
 import com.ncquizbot.ncbot.qrcode.QrCodeGeneratorImpl;
-import com.ncquizbot.ncbot.service.BotMessageHandler;
-import com.ncquizbot.ncbot.service.QuestionService;
-import com.ncquizbot.ncbot.service.ScoreRangesMessengerService;
-import com.ncquizbot.ncbot.service.UserService;
+import com.ncquizbot.ncbot.service.*;
 import com.ncquizbot.ncbot.service.impl.dob.TextAndImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +52,8 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
     private QuestionService questionService;
     @Autowired
     private ScoreRangesMessengerService scoreRangesMessengerService;
+    @Autowired
+    private ImageForReactionService imageForReactionService;
 
     @Override
     public MessagesPackage handleMessage(Update update) {
@@ -226,18 +225,10 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
         if (checkAnswer(Integer.parseInt(userAnswerText), answerIndex)) {
             userService.increaseUserScore(user, questionWeight);
             message = "[ВЕРНО]\n";
-            try {
-                textAndImage.setImage(getImageAsByteArray("/resources/static/ok.jpg"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                textAndImage.setImage(imageForReactionService.getImageByReaction("ok"));
         } else {
             message = "[НЕВЕРНО]\n";
-            try {
-                textAndImage.setImage(getImageAsByteArray("/resources/static/sad.jpg"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            textAndImage.setImage(imageForReactionService.getImageByReaction("sad"));
         }
         textAndImage.setText(message + lastQuestion.getOptions().get(Integer.parseInt(userAnswerText)).getReaction());
         return textAndImage;

@@ -17,6 +17,7 @@ import { MessageFormComponent } from './message-form/message-form.component';
 import { AboutComponent } from './about/about.component';
 import { FirstAndLastMessagesEditorComponent } from './first-and-last-messages-editor/first-and-last-messages-editor.component';
 import { ScoreRangeMessageComponent } from './score-range-message/score-range-message.component';
+import { ImageForReactionsComponent } from './image-for-reactions/image-for-reactions.component';
 
 const appRoutes: Routes = [
   {
@@ -45,6 +46,10 @@ const appRoutes: Routes = [
     component: ScoreRangeMessageComponent
   },
   {
+    path: 'reaction/image/upload',
+    component: ImageForReactionsComponent
+  },
+  {
     path: '**',
     component: NotFoundComponent
   }
@@ -63,7 +68,8 @@ const appRoutes: Routes = [
     MessageFormComponent,
     AboutComponent,
     FirstAndLastMessagesEditorComponent,
-    ScoreRangeMessageComponent
+    ScoreRangeMessageComponent,
+    ImageForReactionsComponent
   ],
   imports: [
     BrowserModule,

@@ -1,6 +1,8 @@
 package com.ncquizbot.ncbot.controller;
 
 import com.ncquizbot.ncbot.bot.Bot;
+import com.ncquizbot.ncbot.model.ImageForReaction;
+import com.ncquizbot.ncbot.model.Question;
 import com.ncquizbot.ncbot.model.ScoreRangesMessenger;
 import com.ncquizbot.ncbot.model.User;
 import com.ncquizbot.ncbot.pojo.BotState;
@@ -8,6 +10,7 @@ import com.ncquizbot.ncbot.pojo.MessageToUsers;
 import com.ncquizbot.ncbot.pojo.ScoreRangesResultArrayPojo;
 import com.ncquizbot.ncbot.pojo.ScoreRangesResultPojo;
 import com.ncquizbot.ncbot.service.GlobalTelegramMessageSender;
+import com.ncquizbot.ncbot.service.ImageForReactionService;
 import com.ncquizbot.ncbot.service.ScoreRangesMessengerService;
 import com.ncquizbot.ncbot.service.UserService;
 import org.slf4j.Logger;
@@ -33,6 +36,8 @@ public class MainController {
     private GlobalTelegramMessageSender globalTelegramMessageSender;
     @Autowired
     private ScoreRangesMessengerService scoreRangesMessengerService;
+    @Autowired
+    private ImageForReactionService imageForReactionService;
 
     @GetMapping("all/users")
     @ResponseBody
@@ -84,5 +89,21 @@ public class MainController {
             e.printStackTrace();
         }
         return ResponseEntity.ok(null);
+    }
+
+    @GetMapping("reaction/image/upload/{reaction}")
+    public ResponseEntity uploadImageForReaction(@RequestParam("image") MultipartFile imageFile, @PathVariable("reaction") String reaction){
+        byte[] imageByte = new byte[0];
+        try {
+            imageByte = imageFile.getBytes();
+            ImageForReaction imageForReaction = new ImageForReaction();
+            imageForReaction.setImage(imageByte);
+            imageForReaction.setType(reaction);
+            imageForReactionService.save(imageForReaction);
+            return ResponseEntity.ok(null);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.ok("IMPOSSIBLE TO SAVE IMAGE");
+        }
     }
 }

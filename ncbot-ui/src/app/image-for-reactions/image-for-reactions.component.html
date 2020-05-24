@@ -1,0 +1,18 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <label>
+        image for OK reaction
+      </label>
+      <input type="file" (change)="changeImageFileOk($event)"/>
+      <button (click)="imageFileOkSend()" class="btn btn-dark">ok</button>
+    </div>
+    <div class="col">
+      <label>
+        image for SAD reaction
+      </label>
+      <input type="file" (change)="changeImageFileSad($event)" />
+      <button (click)="imageFileSadSend()" class="btn btn-dark">ok</button>
+    </div>
+  </div>
+</div>

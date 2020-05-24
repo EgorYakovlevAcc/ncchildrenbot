@@ -21,4 +21,11 @@ export class ScoreRangeResultService {
     formData.append("image", scoreRangeResult.image);
     return this.httpClient.post(url, formData);
   }
+
+  uploadImageForReaction(imageFile: File, reaction:string) {
+    let url = "reaction/image/upload/" + reaction;
+    const formData = new FormData();
+    formData.append("image", imageFile);
+    return this.httpClient.post(url, formData);
+  }
 }
