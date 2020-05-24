@@ -227,14 +227,14 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
             userService.increaseUserScore(user, questionWeight);
             message = "[ВЕРНО]\n";
             try {
-                textAndImage.setImage(getImageAsByteArray("ok.jpg"));
+                textAndImage.setImage(getImageAsByteArray("static/ok.jpg"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
             message = "[НЕВЕРНО]\n";
             try {
-                textAndImage.setImage(getImageAsByteArray("sad.jpg"));
+                textAndImage.setImage(getImageAsByteArray("static/sad.jpg"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
