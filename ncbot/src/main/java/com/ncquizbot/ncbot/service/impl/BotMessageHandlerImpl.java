@@ -211,7 +211,6 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
 
     private TextAndImage updateUserScore(User user, String userAnswerText) {
         LOGGER.info("updateUserScore [START]");
-        String message = "";
         Question lastQuestion = questionService.findQuestionById(user.getCurrentQuestionId());
         Integer questionWeight = lastQuestion.getWeight();
         Answer answer = lastQuestion.getAnswer();
@@ -224,24 +223,12 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
         TextAndImage textAndImage = new TextAndImage();
         if (checkAnswer(Integer.parseInt(userAnswerText), answerIndex)) {
             userService.increaseUserScore(user, questionWeight);
-            message = "[ВЕРНО]\n";
                 textAndImage.setImage(imageForReactionService.getImageByReaction("ok"));
         } else {
-            message = "[НЕВЕРНО]\n";
             textAndImage.setImage(imageForReactionService.getImageByReaction("sad"));
         }
-        textAndImage.setText(message + lastQuestion.getOptions().get(Integer.parseInt(userAnswerText)).getReaction());
+        textAndImage.setText(lastQuestion.getOptions().get(Integer.parseInt(userAnswerText)).getReaction());
         return textAndImage;
-    }
-
-    private byte[] getImageAsByteArray(String imageName) throws IOException {
-        File imgPath = new File(imageName);
-        BufferedImage bufferedImage = ImageIO.read(imgPath);
-
-        // get DataBufferBytes from Raster
-        WritableRaster raster = bufferedImage.getRaster();
-        DataBufferByte data = (DataBufferByte) raster.getDataBuffer();
-        return data.getData();
     }
 
     private MessagesPackage getSendMessageForBot(String content, Long chatId, InlineKeyboardMarkup replyKeyboardMarkup, byte[] attachment) {
