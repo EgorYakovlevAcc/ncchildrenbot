@@ -38,9 +38,6 @@ import java.util.stream.Collectors;
 @Transactional
 public class BotMessageHandlerImpl implements BotMessageHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(Bot.class);
-    public static final String GOODBYE_MESSAGE = "\nОбменять полученные баллы на призы можно у стенда Netcracker на Найти ИТ уже сейчас. \n" +
-            "Если ты хочешь начать карьеру в IT-сфере, то подавай заявку до 31 марта на бесплатное обучение у нас: http://msk.edu-netcracker.com. \n" +
-            "Учебный Центр Netcracker проводит курсы по таким направлениям как Enterprise Development, Business Analysis, Technical Sales, Devops и т.д.";
     public static final String USER_SCORE = "Thank you it was last question. Your score is ";
     public static final String COMMAND_PRESENT = "present";
     public static final String COMMAND_GO = "go";
@@ -103,7 +100,7 @@ public class BotMessageHandlerImpl implements BotMessageHandler {
         MessagesPackage messagesPackage = getSendMessageForBot(ouputMessageText, user.getChatId(), null, outputMessageAttachment);
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(user.getChatId());
-        sendMessage.setText(GOODBYE_MESSAGE);
+        sendMessage.setText(HelloGoodbyeMessages.GOODBYE_MESSAGE.text);
         messagesPackage.addMessageToPackage(sendMessage);
         return messagesPackage;
     }
